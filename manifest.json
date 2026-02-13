@@ -1,0 +1,22 @@
+{
+  "name": "山田太郎のポートフォリオサイト",
+  "short_name": "山田太郎",
+  "description": "UI/UXデザイナー見習いのポートフォリオサイト",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#333333",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
