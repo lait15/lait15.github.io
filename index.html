@@ -1,15 +1,165 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>山田太郎のポートフォリオサイト</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <h1>山田太郎</h1>
-  <p>UI/UXデザイナー見習いです。ドットインストールで勉強中です。</div></p>
-  
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crypto CEX/DEX 乖離モニター</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+
+      <!-- ヘッダー -->
+      <header>
+        <div class="header-left">
+          <h1>Crypto CEX / DEX 乖離モニター</h1>
+          <p class="subtitle">
+            CEX（Binance）とオンチェーン価格（DeFiLlama集計）の乖離をリアルタイム検出
+          </p>
+        </div>
+        <div class="header-right">
+          <div class="status-pill">
+            <span id="status-text">初期化中…</span>
+          </div>
+          <span id="last-update" class="muted"></span>
+          <button id="refresh-btn" class="btn-secondary">手動更新</button>
+        </div>
+      </header>
+
+      <!-- 設定パネル -->
+      <section class="panel">
+        <div class="panel-title">
+          <span>&#9881; 設定</span>
+          <button class="panel-toggle" onclick="this.closest('.panel').classList.toggle('collapsed')">&#9650;</button>
+        </div>
+        <div class="panel-body">
+          <div class="settings-grid">
+
+            <div class="setting-group">
+              <label for="threshold">乖離アラート閾値 (%)</label>
+              <input type="number" id="threshold" value="1.0" min="0.1" max="20" step="0.1" />
+            </div>
+
+            <div class="setting-group">
+              <label for="interval">更新間隔</label>
+              <select id="interval">
+                <option value="15">15 秒</option>
+                <option value="30" selected>30 秒</option>
+                <option value="60">1 分</option>
+                <option value="300">5 分</option>
+              </select>
+            </div>
+
+            <div class="setting-group">
+              <label>ブラウザ通知</label>
+              <button id="notif-btn" class="btn-secondary">通知を許可する</button>
+            </div>
+
+            <div class="setting-group full-width">
+              <label for="discord-webhook">Discord Webhook URL</label>
+              <input
+                type="text"
+                id="discord-webhook"
+                placeholder="https://discord.com/api/webhooks/…"
+              />
+            </div>
+
+            <div class="setting-group">
+              <label for="telegram-token">Telegram Bot Token</label>
+              <input type="text" id="telegram-token" placeholder="1234567890:AAxxxxxx" />
+            </div>
+
+            <div class="setting-group">
+              <label for="telegram-chatid">Telegram Chat ID</label>
+              <input type="text" id="telegram-chatid" placeholder="-1001234567890" />
+            </div>
+          </div>
+
+          <div class="settings-footer">
+            <button id="save-btn" class="btn-primary">設定を保存</button>
+            <p class="hint">
+              設定はブラウザに保存されます。同一ペアへの通知クールダウン: 5分。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 価格カード -->
+      <section>
+        <h2 class="section-title">リアルタイム価格比較</h2>
+        <div id="price-cards" class="price-cards"></div>
+      </section>
+
+      <!-- 乖離率チャート -->
+      <section class="panel">
+        <div class="panel-title">
+          <span>&#128200; 乖離率の推移</span>
+          <select id="chart-pair-select" class="chart-select"></select>
+        </div>
+        <div class="panel-body chart-body">
+          <canvas id="gap-chart"></canvas>
+        </div>
+      </section>
+
+      <!-- アラート履歴 -->
+      <section class="panel">
+        <div class="panel-title">
+          <span>&#128276; アラート履歴</span>
+          <button id="clear-alerts-btn" class="btn-danger-sm">クリア</button>
+        </div>
+        <div class="panel-body">
+          <div id="alert-list">
+            <p class="no-alerts">アラートはまだありません</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- データソース説明 -->
+      <section class="info-section">
+        <h2 class="section-title">データソースと仕組み</h2>
+        <div class="info-grid">
+          <div class="info-card">
+            <h3>CEX 価格 — Binance</h3>
+            <p>
+              Binance の公開 REST API (<code>/api/v3/ticker/price</code>) から
+              リアルタイムの板取引価格を取得。APIキー不要・CORS 対応済み。
+            </p>
+          </div>
+          <div class="info-card">
+            <h3>オンチェーン価格 — DeFiLlama</h3>
+            <p>
+              DeFiLlama Coins API がオンチェーンの DEX プール
+              （Uniswap V3, Curve, Raydium 等）から価格を集計。
+              コントラクトアドレスを直接指定してクエリ。
+            </p>
+          </div>
+          <div class="info-card">
+            <h3>乖離率の計算式</h3>
+            <p>
+              <code>乖離率 = (DEX価格 − CEX価格) / CEX価格 × 100</code><br /><br />
+              正値: DEX &gt; CEX → CEXで買いDEXで売る裁定機会<br />
+              負値: CEX &gt; DEX → DEXで買いCEXで売る裁定機会
+            </p>
+          </div>
+          <div class="info-card">
+            <h3>通知チャネル</h3>
+            <p>
+              ブラウザ通知 (Notification API)・Discord Webhook・
+              Telegram Bot API に対応。Telegram は CORS 制限がなく
+              静的サイトから最も安定して利用できます。
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /.container -->
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/detector.js"></script>
+    <script src="js/notifier.js"></script>
+    <script src="js/app.js"></script>
+  </body>
 </html>
