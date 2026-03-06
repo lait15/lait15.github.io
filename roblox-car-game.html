@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roblox カーデスマッチ - スクリプト集</title>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface2: #242424;
+      --accent: #e05a00;
+      --accent2: #3d7fe8;
+      --text: #e8e8e8;
+      --text-dim: #888;
+      --border: #333;
+      --green: #3da85a;
+      --code-bg: #0d0d0d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ヘッダー */
+    header {
+      background: linear-gradient(135deg, #1a0a00, #0a1a2a);
+      padding: 48px 24px 36px;
+      text-align: center;
+      border-bottom: 2px solid var(--accent);
+    }
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    header h1 span { color: var(--accent); }
+    header p { color: var(--text-dim); font-size: 1rem; }
+
+    /* バッジ行 */
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+    .badge.accent { border-color: var(--accent); color: var(--accent); }
+    .badge.blue   { border-color: var(--accent2); color: var(--accent2); }
+    .badge.green  { border-color: var(--green); color: var(--green); }
+
+    main { max-width: 960px; margin: 0 auto; padding: 40px 20px 80px; }
+
+    /* セクションタイトル */
+    h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    h2 .icon { margin-right: 6px; }
+    h3 { font-size: 1.05rem; font-weight: 600; margin: 20px 0 8px; }
+
+    /* 車種カード */
+    .vehicle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .vehicle-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .vehicle-card .name {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+    .vehicle-card .stat { font-size: 0.82rem; color: var(--text-dim); margin: 2px 0; }
+    .vehicle-card .ability {
+      display: inline-block;
+      margin-top: 8px;
+      background: var(--surface2);
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      border: 1px solid var(--border);
+    }
+    .vc-normal    { border-top: 3px solid #e03030; }
+    .vc-police    { border-top: 3px solid #3050e0; }
+    .vc-ambulance { border-top: 3px solid #b0b0b0; }
+    .vc-fire      { border-top: 3px solid #e06010; }
+    .vc-vip       { border-top: 3px solid gold; }
+
+    /* 機能表 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin: 12px 0 24px;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    th { background: var(--surface2); font-weight: 600; color: var(--text-dim); }
+    tr:hover td { background: var(--surface); }
+
+    /* スクリプトブロック */
+    .script-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .script-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .script-header .file-name {
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #ccc;
+    }
+    .script-header .placement {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    .copy-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { opacity: 0.85; }
+    .copy-btn.copied { background: var(--green); }
+    pre {
+      background: var(--code-bg);
+      padding: 20px;
+      overflow-x: auto;
+      font-family: 'Courier New', 'Consolas', monospace;
+      font-size: 0.78rem;
+      line-height: 1.55;
+      max-height: 400px;
+      color: #c8c8c8;
+    }
+    pre .comment { color: #5a8a5a; }
+    pre .keyword { color: #6baed6; }
+    pre .string  { color: #ce9178; }
+    pre .number  { color: #b5cea8; }
+
+    /* セットアップ手順 */
+    .steps { counter-reset: step; }
+    .step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+    .step-num {
+      counter-increment: step;
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: #fff;
+    }
+    .step-num::before { content: counter(step); }
+    .step-body { flex: 1; }
+    .step-body strong { display: block; margin-bottom: 4px; font-size: 0.95rem; }
+    .step-body p { font-size: 0.85rem; color: var(--text-dim); }
+    code {
+      background: var(--surface2);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.82rem;
+      font-family: monospace;
+      color: #c8c8c8;
+    }
+
+    /* フッター */
+    footer {
+      text-align: center;
+      padding: 32px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Roblox <span>カーデスマッチ</span></h1>
+  <p>車でぶつかり合うデスマッチゲームの Luau スクリプト集</p>
+  <div class="badges">
+    <span class="badge accent">デスマッチ</span>
+    <span class="badge blue">特殊車両×4</span>
+    <span class="badge green">ドリフト対応</span>
+    <span class="badge">パワーアップアイテム</span>
+    <span class="badge">課金システム</span>
+    <span class="badge">拡張しやすい設計</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ==============================
+       車種 -->
+  <h2><span class="icon">🚗</span>車種一覧</h2>
+  <div class="vehicle-grid">
+    <div class="vehicle-card vc-normal">
+      <div class="name">普通の車</div>
+      <div class="stat">HP: 100 / 速度: 80</div>
+      <div class="stat">バランス型</div>
+      <div class="ability">[E] スピードブースト</div>
+    </div>
+    <div class="vehicle-card vc-police">
+      <div class="name">🚓 パトカー</div>
+      <div class="stat">HP: 120 / 速度: 75</div>
+      <div class="stat">牽制・サイレン付き</div>
+      <div class="ability">[E] EMP（周囲停止）</div>
+    </div>
+    <div class="vehicle-card vc-ambulance">
+      <div class="name">🚑 救急車</div>
+      <div class="stat">HP: 150 / 速度: 65</div>
+      <div class="stat">耐久型・サイレン付き</div>
+      <div class="ability">[E] 緊急修復（回復）</div>
+    </div>
+    <div class="vehicle-card vc-fire">
+      <div class="name">🚒 消防車</div>
+      <div class="stat">HP: 180 / 速度: 60</div>
+      <div class="stat">超タフ・サイレン付き</div>
+      <div class="ability">[E] 放水（スロー+ダメージ）</div>
+    </div>
+    <div class="vehicle-card vc-vip">
+      <div class="name">⭐ VIPカー</div>
+      <div class="stat">HP: 120 / 速度: 100</div>
+      <div class="stat">Game Pass 限定</div>
+      <div class="ability">[E] スーパーブースト</div>
+    </div>
+  </div>
+
+  <!-- ==============================
+       キー操作 -->
+  <h2><span class="icon">⌨️</span>キー操作</h2>
+  <table>
+    <thead><tr><th>キー</th><th>動作</th></tr></thead>
+    <tbody>
+      <tr><td><code>W / ↑</code></td><td>前進</td></tr>
+      <tr><td><code>S / ↓</code></td><td>後退</td></tr>
+      <tr><td><code>A / ←</code></td><td>左ステアリング</td></tr>
+      <tr><td><code>D / →</code></td><td>右ステアリング</td></tr>
+      <tr><td><code>Shift</code></td><td>スピードブースト（クールダウンあり）</td></tr>
+      <tr><td><code>Alt</code></td><td>ドリフト（横滑り・コイン加算）</td></tr>
+      <tr><td><code>E</code></td><td>アビリティ発動（車種によって異なる）</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ==============================
+       スクリプト -->
+  <h2><span class="icon">📜</span>スクリプト</h2>
+
+  <!-- CarSettings -->
+  <div class="script-block">
+    <div class="script-header">
+      <div>
+        <div class="file-name">CarSettings.lua</div>
+        <div class="placement">ModuleScript → ReplicatedStorage</div>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this, 'code-settings')">コピー</button>
+    </div>
+    <pre id="code-settings">-- 全パラメータ・車種・マップ・アイテムを一元管理
+-- 新要素の追加はテーブルへの追記のみ
+
+local CarSettings = {}
+
+CarSettings.Vehicles = {
+    Normal    = { DisplayName="普通の車", MaxSpeed=80,  HP=100, Ability="Boost", ... },
+    Police    = { DisplayName="パトカー",  MaxSpeed=75, HP=120, Ability="EMP",   HasSiren=true, ... },
+    Ambulance = { DisplayName="救急車",   MaxSpeed=65,  HP=150, Ability="Heal",  HasSiren=true, ... },
+    Fire      = { DisplayName="消防車",   MaxSpeed=60,  HP=180, Ability="Water", HasSiren=true, ... },
+    VIP       = { DisplayName="VIPカー",  MaxSpeed=100, HP=120, Ability="Boost", RequiresGamePass="hasVIPCar" },
+    -- ↑ 新車種をここに追加するだけ
+}
+
+CarSettings.Maps  = { "City", "Desert", "Factory" }  -- 名前を追加するだけで対応
+
+CarSettings.Items = {
+    SpeedPad = { effect="speed",  duration=5, multiplier=1.5 },
+    Shield   = { effect="shield", duration=8, damageBlock=0.5 },
+    Bomb     = { effect="aoe",    radius=15,  damage=40 },
+    -- ↑ 新アイテムをここに追加するだけ
+}
+
+return CarSettings</pre>
+  </div>
+
+  <!-- CarController -->
+  <div class="script-block">
+    <div class="script-header">
+      <div>
+        <div class="file-name">CarController.lua</div>
+        <div class="placement">LocalScript → StarterPlayerScripts</div>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this, 'code-controller')">コピー</button>
+    </div>
+    <pre id="code-controller">-- WASD操作・Shiftブースト・Altドリフト・Eアビリティ・サイレン点滅
+
+local Settings = require(ReplicatedStorage:WaitForChild("CarSettings"))
+local vConfig  = Settings.Vehicles[vehicleType]
+
+-- 入力マップ
+local inputMap = { Forward=false, Backward=false, Left=false, Right=false,
+                   Boost=false, Drift=false, Ability=false }
+
+-- Eキーでアビリティ発動 → サーバーに FireAbility イベントを送信
+activateAbility = function()
+    if abilityCooldown then return end
+    abilityCooldown = true
+    evAbility:FireServer(vehicleType)
+    task.delay(vConfig.AbilityCooldown, function() abilityCooldown = false end)
+end
+
+-- Altキーでドリフト（横方向に滑る）
+if inputMap.Drift then
+    local lateralVel = bv.Velocity - forward * bv.Velocity:Dot(forward)
+    bv.Velocity = forward * bv.Velocity:Dot(forward)
+              + lateralVel * Settings.DriftFriction
+end
+
+-- 特殊車両はサイレン音＋ライト点滅
+if vConfig.HasSiren then
+    sirenSound:Play()
+    -- 0.3秒ごとにLight1/Light2を交互点滅
+end</pre>
+  </div>
+
+  <!-- DeathmatchManager -->
+  <div class="script-block">
+    <div class="script-header">
+      <div>
+        <div class="file-name">DeathmatchManager.lua</div>
+        <div class="placement">Script → ServerScriptService</div>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this, 'code-manager')">コピー</button>
+    </div>
+    <pre id="code-manager">-- サーバー側：車生成・衝突ダメージ・アビリティ処理・リスポーン・コイン
+
+-- 衝突ダメージ（速度差でダメージを計算）
+body.Touched:Connect(function(hit)
+    local speedDiff = math.abs(body.Velocity.Magnitude - hit.Velocity.Magnitude)
+    if speedDiff >= Settings.CollisionSpeedThreshold then
+        local damage = math.floor(speedDiff * Settings.CollisionDamageMultiplier)
+        applyDamage(player, hitPlayer, damage)
+    end
+end)
+
+-- HP0 → 爆発 → RespawnDelay 秒後にリスポーン
+killPlayer = function(killer, victim)
+    local explosion = Instance.new("Explosion")
+    explosion.Position = body.Position
+    explosion.Parent   = workspace
+    victimData.car:Destroy()
+    task.delay(Settings.RespawnDelay, function() spawnCar(victim, savedType) end)
+end
+
+-- アビリティ処理（EMP例）
+if vConfig.Ability == "EMP" then
+    for _, otherData in pairs(playerData) do
+        if (myBody.Position - otherBody.Position).Magnitude <= vConfig.EMPRadius then
+            bv.Velocity = Vector3.zero  -- 一時停止
+        end
+    end
+end</pre>
+  </div>
+
+  <!-- VehicleSelectGui -->
+  <div class="script-block">
+    <div class="script-header">
+      <div>
+        <div class="file-name">VehicleSelectGui.lua</div>
+        <div class="placement">LocalScript → StarterGui</div>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this, 'code-selectgui')">コピー</button>
+    </div>
+    <pre id="code-selectgui">-- ゲーム開始時に車種を選択するUI
+-- CarSettings.Vehicles のテーブルからボタンを自動生成
+
+for _, vType in ipairs(vehicleOrder) do
+    local btn = Instance.new("TextButton")
+    btn.Text  = vConfig.DisplayName .. "\nHP: " .. vConfig.HP
+
+    -- Game Pass 限定バッジ
+    if vConfig.RequiresGamePass then
+        local badge     = Instance.new("TextLabel")
+        badge.Text      = "Game Pass 限定"
+        badge.Parent    = btn
+    end
+
+    btn.MouseButton1Click:Connect(function()
+        evSelectVehicle:FireServer(vType)  -- サーバーに通知
+        screenGui:Destroy()
+    end)
+end</pre>
+  </div>
+
+  <!-- HUD -->
+  <div class="script-block">
+    <div class="script-header">
+      <div>
+        <div class="file-name">HUD.lua</div>
+        <div class="placement">LocalScript → StarterGui</div>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this, 'code-hud')">コピー</button>
+    </div>
+    <pre id="code-hud">-- HPバー・コイン・スコア・キルフィード・アイテム通知
+
+-- HPバー（比率に応じて色変化）
+evUpdateHP.OnClientEvent:Connect(function(hp, maxHP)
+    local ratio = hp / maxHP
+    hpBar.Size  = UDim2.new(ratio, 0, 1, 0)
+    hpBar.BackgroundColor3 = ratio > 0.5 and Color3.fromRGB(50,200,70)
+                          or ratio > 0.25 and Color3.fromRGB(220,175,30)
+                          or Color3.fromRGB(220,50,50)
+end)
+
+-- キルフィード（3秒で自動フェードアウト）
+evKilled.OnClientEvent:Connect(function(killerName, victimName)
+    killFeedLabel.Text = killerName .. " が " .. victimName .. " を撃破！"
+    task.delay(3, function()
+        TweenService:Create(killFeedLabel, TweenInfo.new(0.5), { TextTransparency=1 }):Play()
+    end)
+end)</pre>
+  </div>
+
+  <!-- MonetizationManager -->
+  <div class="script-block">
+    <div class="script-header">
+      <div>
+        <div class="file-name">MonetizationManager.lua</div>
+        <div class="placement">Script → ServerScriptService</div>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this, 'code-monetize')">コピー</button>
+    </div>
+    <pre id="code-monetize">-- Game Pass & Developer Product（追加はテーブルへの1行のみ）
+
+-- ① Game Pass テーブル（1行追加するだけで対応）
+local GAME_PASSES = {
+    { id = 123456789, flag = "hasVIPCar"       },  -- ← 自分のIDに変更
+    { id = 123456790, flag = "hasDoubleCoin"   },
+    { id = 123456791, flag = "hasPremiumColor" },
+    -- ↑ 新Game Passをここに追加
+}
+
+-- ② Developer Product テーブル（1行追加するだけで対応）
+local DEV_PRODUCTS = {
+    [987654321] = function(player) addCoins(player, 100)      end,  -- ← 自分のIDに変更
+    [987654322] = function(player) healPlayer(player)         end,
+    [987654323] = function(player) activateSuperBoost(player) end,
+    -- ↑ 新商品をここに追加
+}
+
+-- 共通処理（変更不要）
+MarketplaceService.ProcessReceipt = function(receiptInfo)
+    local handler = DEV_PRODUCTS[receiptInfo.ProductId]
+    if handler then pcall(handler, player) end
+    return Enum.ProductPurchaseDecision.PurchaseGranted
+end</pre>
+  </div>
+
+  <!-- ==============================
+       セットアップ手順 -->
+  <h2><span class="icon">🔧</span>Roblox Studio セットアップ手順</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <strong>新規プレースを作成</strong>
+        <p>Roblox Studio を開き、Baseplate または新規プレースを作成してください。</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <strong>スクリプトを配置</strong>
+        <p>
+          <code>CarSettings.lua</code> → ReplicatedStorage に ModuleScript として配置<br>
+          <code>CarController.lua</code> → StarterPlayerScripts に LocalScript として配置<br>
+          <code>DeathmatchManager.lua</code> → ServerScriptService に Script として配置<br>
+          <code>VehicleSelectGui.lua</code> → StarterGui に LocalScript として配置<br>
+          <code>HUD.lua</code> → StarterGui に LocalScript として配置<br>
+          <code>MonetizationManager.lua</code> → ServerScriptService に Script として配置
+        </p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <strong>CarTemplate モデルを用意</strong>
+        <p>
+          車のモデルを作成し、<code>Body</code> という名前の PrimaryPart を設定。
+          必要に応じて <code>Light1</code> / <code>Light2</code>（PointLight）と
+          <code>SirenSound</code>（Sound）を子に追加。
+          モデルを <code>ReplicatedStorage</code> に <code>CarTemplate</code> という名前で配置。
+        </p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <strong>スポーン地点を配置</strong>
+        <p>Workspace に <code>Spawns</code> フォルダを作成し、SpawnLocation を複数配置。</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <strong>マップを用意（任意）</strong>
+        <p>
+          Workspace に <code>Maps</code> フォルダを作成し、
+          <code>City</code> / <code>Desert</code> / <code>Factory</code> サブフォルダを配置。
+          新マップ追加は <code>CarSettings.lua</code> の <code>CarSettings.Maps</code> リストに名前を追記するだけ。
+        </p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <strong>課金IDを差し替え（任意）</strong>
+        <p>
+          <code>MonetizationManager.lua</code> の <code>GAME_PASSES</code> / <code>DEV_PRODUCTS</code> テーブルの
+          ID を、Roblox Creator Dashboard で取得した実際のIDに変更。
+        </p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <strong>テストプレイ</strong>
+        <p>
+          Roblox Studio の「テスト」タブ → 「プレイ」で動作確認。
+          車種選択GUIが表示され、WASD で移動・Shift でブースト・Alt でドリフト・E でアビリティが使えれば成功。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================
+       拡張ガイド -->
+  <h2><span class="icon">🔌</span>拡張ガイド</h2>
+  <table>
+    <thead><tr><th>やりたいこと</th><th>変更場所</th><th>手順</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>新しい車種を追加</td>
+        <td><code>CarSettings.lua</code></td>
+        <td><code>CarSettings.Vehicles</code> テーブルに1エントリ追加</td>
+      </tr>
+      <tr>
+        <td>新しいアビリティを追加</td>
+        <td><code>DeathmatchManager.lua</code></td>
+        <td><code>handleAbility</code> 内に <code>elseif vConfig.Ability == "XXX"</code> を追加</td>
+      </tr>
+      <tr>
+        <td>新しいマップを追加</td>
+        <td><code>CarSettings.lua</code></td>
+        <td><code>CarSettings.Maps</code> に名前を追加し、Workspace/Maps に同名フォルダを作成</td>
+      </tr>
+      <tr>
+        <td>新しいアイテムを追加</td>
+        <td><code>CarSettings.lua</code></td>
+        <td><code>CarSettings.Items</code> テーブルに1エントリ追加</td>
+      </tr>
+      <tr>
+        <td>新しいGame Passを追加</td>
+        <td><code>MonetizationManager.lua</code></td>
+        <td><code>GAME_PASSES</code> テーブルに <code>{ id=..., flag=... }</code> を追加</td>
+      </tr>
+      <tr>
+        <td>新しい商品（Developer Product）を追加</td>
+        <td><code>MonetizationManager.lua</code></td>
+        <td><code>DEV_PRODUCTS</code> テーブルに <code>[ID] = function(player) ... end</code> を追加</td>
+      </tr>
+    </tbody>
+  </table>
+
+</main>
+
+<footer>
+  <p>Roblox カーデスマッチ スクリプト集 &mdash; lait15.github.io</p>
+</footer>
+
+<script>
+function copyCode(btn, id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    btn.textContent = 'コピー済み！';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'コピー';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>
