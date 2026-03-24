@@ -143,6 +143,32 @@ const Sources = {
   },
 
   /* -------------------------------------------------------
+   * オンチェーン（Bitcoin）
+   * -------------------------------------------------------
+   * mempool.space: Bitcoinmempool・手数料 (CORS対応・認証不要)
+   * blockchain.info: Bitcoin 24h統計 (CORS対応・認証不要)
+   * 過去実績: FTX崩壊・BTC半減期前に異常が先行観測された
+   */
+  async fetchOnchain() {
+    const [mempoolRes, feesRes, statsRes] = await Promise.allSettled([
+      fetch('https://mempool.space/api/mempool').then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      fetch('https://mempool.space/api/v1/fees/recommended').then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      fetch('https://blockchain.info/stats?format=json').then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+    ]);
+
+    return {
+      mempool:  mempoolRes.status  === 'fulfilled' ? mempoolRes.value  : null,
+      fees:     feesRes.status     === 'fulfilled' ? feesRes.value     : null,
+      btcStats: statsRes.status    === 'fulfilled' ? statsRes.value    : null,
+      errors: [
+        mempoolRes.status  === 'rejected' ? `mempool: ${mempoolRes.reason.message}`   : null,
+        feesRes.status     === 'rejected' ? `fees: ${feesRes.reason.message}`         : null,
+        statsRes.status    === 'rejected' ? `stats: ${statsRes.reason.message}`       : null,
+      ].filter(Boolean),
+    };
+  },
+
+  /* -------------------------------------------------------
    * 公式SNSリンク集（静的定義）
    * -------------------------------------------------------
    * Twitter APIは静的サイトから認証なし取得不可のためリンク集として提供

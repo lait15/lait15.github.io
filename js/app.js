@@ -11,6 +11,7 @@ const App = {
     reddit:   [],
     github:   [],
     trending: [],
+    onchain:  null,
   },
 
   async init() {
@@ -22,20 +23,22 @@ const App = {
     this._setStatus('loading');
 
     // 全ソースを並列取得
-    const [fng, reddit, github, trending] = await Promise.all([
+    const [fng, reddit, github, trending, onchain] = await Promise.all([
       this._fetch('fng',      () => Sources.fetchFearAndGreed()),
       this._fetch('reddit',   () => Sources.fetchReddit()),
       this._fetch('github',   () => Sources.fetchGitHub()),
       this._fetch('trending', () => Sources.fetchTrending()),
+      this._fetch('onchain',  () => Sources.fetchOnchain()),
     ]);
 
-    this.data = { fng, reddit, github, trending };
+    this.data = { fng, reddit, github, trending, onchain };
 
     // UI描画
     this._renderFng(fng);
     this._renderReddit(reddit);
     this._renderGitHub(github);
     this._renderTrending(trending);
+    this._renderOnchain(onchain);
     this._renderOfficialLinks();
     this._renderActions();
 
@@ -56,7 +59,7 @@ const App = {
     } catch (e) {
       console.error(`[App] ${key} fetch error:`, e);
       this._setSourceStatus(key, 'error');
-      return key === 'fng' ? null : [];
+      return (key === 'fng' || key === 'onchain') ? null : [];
     }
   },
 
@@ -228,6 +231,116 @@ const App = {
           ${changeHtml}
         </div>`;
     }).join('');
+  },
+
+  /* -------------------------------------------------------
+   * オンチェーン（Bitcoin）描画
+   */
+  _renderOnchain(data) {
+    const el = document.getElementById('onchain-feed');
+    if (!data || (!data.mempool && !data.fees && !data.btcStats)) {
+      el.innerHTML = '<p class="error-msg">取得失敗。mempool.space / blockchain.info に接続できませんでした。</p>';
+      return;
+    }
+
+    const { mempool, fees, btcStats } = data;
+
+    // mempool混雑レベル判定
+    let congestionLevel = 'low', congestionColor = 'var(--green)', congestionLabel = '平常';
+    if (mempool) {
+      if (mempool.count > 150_000) {
+        congestionLevel = 'high'; congestionColor = 'var(--red)'; congestionLabel = '極度混雑';
+      } else if (mempool.count > 80_000) {
+        congestionLevel = 'medium'; congestionColor = 'var(--yellow)'; congestionLabel = '混雑';
+      }
+    }
+
+    const mempoolHtml = mempool ? `
+      <div class="onchain-card">
+        <div class="onchain-card-title">Bitcoin Mempool（mempool.space）</div>
+        <div class="mempool-stat">
+          <span class="mempool-label">未確認TX数</span>
+          <span class="mempool-value" style="color:${congestionColor}">${mempool.count.toLocaleString()} 件</span>
+        </div>
+        <div class="mempool-stat">
+          <span class="mempool-label">仮想サイズ</span>
+          <span class="mempool-value">${(mempool.vsize / 1_000_000).toFixed(1)} MvB</span>
+        </div>
+        <div class="mempool-stat">
+          <span class="mempool-label">合計手数料</span>
+          <span class="mempool-value">${(mempool.total_fee / 1e8).toFixed(4)} BTC</span>
+        </div>
+        <div class="congestion-bar-wrap">
+          <div class="congestion-label">
+            <span>混雑度: <strong style="color:${congestionColor}">${congestionLabel}</strong></span>
+            <span>基準: 15万件</span>
+          </div>
+          <div class="congestion-bar">
+            <div class="congestion-bar-fill" style="width:${Math.min((mempool.count/150_000)*100,100).toFixed(1)}%;background:${congestionColor}"></div>
+          </div>
+        </div>
+      </div>` : '';
+
+    const feeFmt = (v) => {
+      const cls = v > 100 ? 'fee-high' : v > 50 ? 'fee-medium' : 'fee-low';
+      return `<span class="${cls}">${v} sat/vB</span>`;
+    };
+
+    const feesHtml = fees ? `
+      <div class="onchain-card">
+        <div class="onchain-card-title">推奨手数料（mempool.space）</div>
+        <table class="fee-table">
+          <tr><td>最速確認（~10分）</td><td>${feeFmt(fees.fastestFee)}</td></tr>
+          <tr><td>30分確認</td><td>${feeFmt(fees.halfHourFee)}</td></tr>
+          <tr><td>1時間確認</td><td>${feeFmt(fees.hourFee)}</td></tr>
+          <tr><td>エコノミー</td><td>${feeFmt(fees.economyFee)}</td></tr>
+          <tr><td>最小</td><td>${feeFmt(fees.minimumFee)}</td></tr>
+        </table>
+      </div>` : '';
+
+    const statsHtml = btcStats ? `
+      <div class="onchain-card">
+        <div class="onchain-card-title">24h統計（blockchain.info）</div>
+        <div class="mempool-stat">
+          <span class="mempool-label">ブロック時間（平均）</span>
+          <span class="mempool-value" style="color:${btcStats.minutes_between_blocks > 15 ? 'var(--red)' : 'var(--text)'}">${btcStats.minutes_between_blocks?.toFixed(1) ?? '—'} 分</span>
+        </div>
+        <div class="mempool-stat">
+          <span class="mempool-label">採掘ブロック数 (24h)</span>
+          <span class="mempool-value">${btcStats.n_blocks_mined ?? '—'} ブロック</span>
+        </div>
+        <div class="mempool-stat">
+          <span class="mempool-label">TX数 (24h)</span>
+          <span class="mempool-value">${btcStats.n_tx?.toLocaleString() ?? '—'}</span>
+        </div>
+        <div class="mempool-stat">
+          <span class="mempool-label">手数料合計 (24h)</span>
+          <span class="mempool-value">${btcStats.total_fees_btc?.toFixed(4) ?? '—'} BTC</span>
+        </div>
+      </div>` : '';
+
+    const explorerHtml = `
+      <div class="onchain-card">
+        <div class="onchain-card-title">一次情報へのダイレクトリンク</div>
+        <div class="mempool-stat">
+          <span class="mempool-label">mempool.space</span>
+          <a href="https://mempool.space" target="_blank" rel="noopener" style="font-size:12px;color:var(--onchain)">mempool →</a>
+        </div>
+        <div class="mempool-stat">
+          <span class="mempool-label">blockchain.info</span>
+          <a href="https://blockchain.info" target="_blank" rel="noopener" style="font-size:12px;color:var(--onchain)">stats →</a>
+        </div>
+        <div class="mempool-stat">
+          <span class="mempool-label">Etherscan（ETH）</span>
+          <a href="https://etherscan.io" target="_blank" rel="noopener" style="font-size:12px;color:var(--github)">explorer →</a>
+        </div>
+        <div class="mempool-stat" style="border:none">
+          <span class="mempool-label">Solscan（SOL）</span>
+          <a href="https://solscan.io" target="_blank" rel="noopener" style="font-size:12px;color:var(--coingecko)">explorer →</a>
+        </div>
+      </div>`;
+
+    el.innerHTML = `<div class="onchain-grid">${mempoolHtml}${feesHtml}${statsHtml}${explorerHtml}</div>`;
   },
 
   /* -------------------------------------------------------

@@ -17,6 +17,7 @@
   --github:    #58a6ff;
   --coingecko: #8dc647;
   --sentiment: #ffba00;
+  --onchain:   #f7931a;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -262,6 +263,7 @@ button:hover { opacity: 0.85; }
 .badge-github    { background: rgba(88,166,255,0.12); color: var(--github); }
 .badge-coingecko { background: rgba(141,198,71,0.12); color: var(--coingecko); }
 .badge-sentiment { background: rgba(255,186,0,0.12);  color: var(--sentiment); }
+.badge-onchain   { background: rgba(247,147,26,0.15); color: var(--onchain); }
 
 .source-fetch-status {
   display: flex;
@@ -603,6 +605,91 @@ button:hover { opacity: 0.85; }
 }
 
 /* =========================================================
+   オンチェーン表示
+   ========================================================= */
+.onchain-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.onchain-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.onchain-card-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.mempool-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.mempool-stat:last-child { border-bottom: none; }
+
+.mempool-label { color: var(--muted); font-size: 12px; }
+.mempool-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* 混雑バー */
+.congestion-bar-wrap { margin-top: 10px; }
+
+.congestion-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.congestion-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.congestion-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease, background 0.3s;
+}
+
+/* 手数料テーブル */
+.fee-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.fee-table td {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+
+.fee-table tr:last-child td { border-bottom: none; }
+
+.fee-table td:first-child { color: var(--muted); }
+.fee-table td:last-child  { text-align: right; font-weight: 700; }
+
+.fee-high   { color: var(--red); }
+.fee-medium { color: var(--yellow); }
+.fee-low    { color: var(--green); }
+
+/* =========================================================
    レスポンシブ
    ========================================================= */
 @media (max-width: 600px) {
@@ -610,4 +697,5 @@ button:hover { opacity: 0.85; }
   .links-grid { grid-template-columns: 1fr 1fr; }
   .fng-display { flex-direction: column; align-items: flex-start; }
   .fng-gauge { width: 140px; }
+  .onchain-grid { grid-template-columns: 1fr; }
 }

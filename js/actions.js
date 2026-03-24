@@ -16,7 +16,7 @@ const Actions = {
    * @param {object} data - { fng, reddit, github, trending }
    * @returns {Array<{priority, title, desc, source}>}
    */
-  generate({ fng, reddit, github, trending }) {
+  generate({ fng, reddit, github, trending, onchain }) {
     const actions = [];
 
     // -- Fear & Greed -------------------------------------------------
@@ -41,6 +41,12 @@ const Actions = {
     if (trending && trending.length > 0) {
       const trendActions = this._fromTrending(trending);
       actions.push(...trendActions);
+    }
+
+    // -- オンチェーン（Bitcoin）---------------------------------------
+    if (onchain && (onchain.mempool || onchain.fees || onchain.btcStats)) {
+      const onchainActions = this._fromOnchain(onchain);
+      actions.push(...onchainActions);
     }
 
     // 優先度順にソート: high → medium → low → info
@@ -231,6 +237,78 @@ const Actions = {
         desc:     `トレンド上位の ${bigMover.name} が急変動中。公式X（@${bigMover.symbol.toLowerCase()}）・公式Telegram・プロジェクトのGitHubで発表・アップグレード・事件の一次情報を確認する。SNS上の「噂」ではなく一次情報源にアクセスすること。`,
         source:   '一次情報元: CoinGecko Trending（SNS集計）',
       });
+    }
+
+    return actions;
+  },
+
+  /* -------------------------------------------------------
+   * オンチェーン（Bitcoin）からアクション生成
+   */
+  _fromOnchain({ mempool, fees, btcStats }) {
+    const actions = [];
+
+    // --- Mempool 混雑アクション ---
+    if (mempool) {
+      const count = mempool.count;
+
+      if (count > 150_000) {
+        actions.push({
+          priority: 'high',
+          title:    `Bitcoin mempool 極度混雑（未確認TX: ${count.toLocaleString()}件）`,
+          desc:     `mempoolが15万件超と極度に混雑。過去の事例（半減期・大型イベント・市場急変）と同様のパターン。取引所への大量入出金の有無をmempool.spaceで直接確認し、異変の一次情報を取得する。`,
+          source:   '一次情報元: mempool.space（Bitcoin on-chain）',
+        });
+      } else if (count > 80_000) {
+        actions.push({
+          priority: 'medium',
+          title:    `Bitcoin mempool 混雑（未確認TX: ${count.toLocaleString()}件）`,
+          desc:     `mempoolが8万件超と混雑気味。何らかのオンチェーンイベントが進行している可能性。mempool.spaceでトランザクションの内訳（手数料・送信元）を確認し、大口移動の有無を判断する。`,
+          source:   '一次情報元: mempool.space（Bitcoin on-chain）',
+        });
+      } else {
+        actions.push({
+          priority: 'info',
+          title:    `Bitcoin mempool は平常（未確認TX: ${count.toLocaleString()}件）`,
+          desc:     `mempoolに特異な混雑なし。通常の取引フロー。大型イベント前は急激に増加することがあるため、定期的なオンチェーンモニタリングを継続する。`,
+          source:   '一次情報元: mempool.space（Bitcoin on-chain）',
+        });
+      }
+    }
+
+    // --- 手数料アクション ---
+    if (fees) {
+      const fast = fees.fastestFee;
+
+      if (fast > 100) {
+        actions.push({
+          priority: 'high',
+          title:    `Bitcoin手数料急騰（最速: ${fast} sat/vB）`,
+          desc:     `最速確認の手数料が100 sat/vBを超える異常水準。過去の急騰は大型ハック・フォーク・ETF承認などのオンチェーンイベントと連動していた。mempool.space / X公式で一次情報を緊急確認する。`,
+          source:   '一次情報元: mempool.space fees（Bitcoin on-chain）',
+        });
+      } else if (fast > 50) {
+        actions.push({
+          priority: 'medium',
+          title:    `Bitcoin手数料上昇中（最速: ${fast} sat/vB）`,
+          desc:     `手数料が50 sat/vBを超えている。ネットワークへの需要増加のシグナル。オンチェーン上の大口移動や取引所フローをmempool.spaceで確認する。`,
+          source:   '一次情報元: mempool.space fees（Bitcoin on-chain）',
+        });
+      }
+    }
+
+    // --- ブロックチェーン統計アクション ---
+    if (btcStats) {
+      const blockTime = btcStats.minutes_between_blocks;
+
+      if (blockTime > 15) {
+        actions.push({
+          priority: 'medium',
+          title:    `Bitcoinブロック生成が遅延（平均 ${blockTime.toFixed(1)} 分/ブロック）`,
+          desc:     `平均ブロック生成時間が15分超。マイナーの大規模な移動（中国規制時など）や難易度調整直前に起きる現象。blockchain.infoでハッシュレートの推移を確認する。`,
+          source:   '一次情報元: blockchain.info stats（Bitcoin on-chain）',
+        });
+      }
     }
 
     return actions;

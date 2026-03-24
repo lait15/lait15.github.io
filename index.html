@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>仮想通貨 SNS一次情報ダッシュボード</title>
+  <title>仮想通貨 一次情報ダッシュボード</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -12,9 +12,9 @@
     <!-- ヘッダー -->
     <header>
       <div class="header-left">
-        <h1>仮想通貨 SNS 一次情報ダッシュボード</h1>
+        <h1>仮想通貨 一次情報ダッシュボード</h1>
         <p class="subtitle">
-          過去に<strong>一次情報の発信源</strong>となったSNS・コミュニティから現在の情報を取得し、<strong>次のアクション</strong>を提示
+          過去に<strong>一次情報の発信源</strong>となったSNS・オンチェーンから現在の情報を取得し、<strong>次のアクション</strong>を提示
         </p>
       </div>
       <div class="header-right">
@@ -109,6 +109,31 @@
       <div class="source-live">
         <div class="live-label">&#128225; 現在のトレンドコイン（SNS急上昇）</div>
         <div id="trending-feed" class="feed-list"><p class="placeholder">取得中…</p></div>
+      </div>
+    </div>
+
+    <!-- オンチェーン（Bitcoin） -->
+    <div class="source-panel" id="src-onchain">
+      <div class="source-header">
+        <div class="source-meta">
+          <span class="source-badge badge-onchain">On-Chain</span>
+          <div class="source-name">Bitcoin Mempool &amp; ブロックチェーン統計</div>
+        </div>
+        <div class="source-fetch-status" id="onchain-fetch-status">
+          <span class="dot dot-idle"></span><span>待機中</span>
+        </div>
+      </div>
+      <div class="source-history">
+        <div class="history-label">&#128218; 過去の一次情報実績</div>
+        <ul class="history-list">
+          <li><span class="hist-date">2022年11月</span>FTX崩壊の数時間前、FTXウォレットから取引所への大量入金がオンチェーンで観測された。ブロックチェーン上の動きはメディア報道より先に現れる最も純粋な一次情報</li>
+          <li><span class="hist-date">2024年4月</span>Bitcoin半減期直前のmempoolが急激に混雑し手数料が急騰。イベント前のオンチェーン異変としてリアルタイムに観測可能だった</li>
+          <li><span class="hist-date">役割</span>すべての取引・残高変動が誰でも検証可能な形で記録されるブロックチェーンは、第三者の解釈を介さない「最上流の一次情報」である</li>
+        </ul>
+      </div>
+      <div class="source-live">
+        <div class="live-label">&#128225; 現在のオンチェーン状態</div>
+        <div id="onchain-feed"><p class="placeholder">取得中…</p></div>
       </div>
     </div>
 
