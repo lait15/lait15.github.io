@@ -1,15 +1,192 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>山田太郎のポートフォリオサイト</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>仮想通貨 一次情報ダッシュボード</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <h1>山田太郎</h1>
-  <p>UI/UXデザイナー見習いです。ドットインストールで勉強中です。</div></p>
-  
+  <div class="container">
+
+    <!-- ヘッダー -->
+    <header>
+      <div class="header-left">
+        <h1>仮想通貨 一次情報ダッシュボード</h1>
+        <p class="subtitle">
+          過去に<strong>一次情報の発信源</strong>となったSNS・オンチェーンから現在の情報を取得し、<strong>次のアクション</strong>を提示
+        </p>
+      </div>
+      <div class="header-right">
+        <div class="status-pill"><span id="status-text">初期化中…</span></div>
+        <span id="last-update" class="muted"></span>
+        <button id="refresh-btn" class="btn-secondary">手動更新</button>
+      </div>
+    </header>
+
+    <!-- ===== 次のアクション ===== -->
+    <section class="panel action-panel">
+      <div class="panel-title">
+        <span>&#9889; 次のアクション</span>
+        <span class="panel-badge" id="action-count">—</span>
+      </div>
+      <div class="panel-body" id="action-list">
+        <p class="placeholder">データ読込中…</p>
+      </div>
+    </section>
+
+    <!-- ===== 一次情報ソース ===== -->
+    <h2 class="section-title">一次情報ソース — 実績と現在の情報</h2>
+
+    <!-- Reddit -->
+    <div class="source-panel" id="src-reddit">
+      <div class="source-header">
+        <div class="source-meta">
+          <span class="source-badge badge-reddit">Reddit</span>
+          <div class="source-name">r/CryptoCurrency &amp; r/Bitcoin</div>
+        </div>
+        <div class="source-fetch-status" id="reddit-fetch-status">
+          <span class="dot dot-idle"></span><span>待機中</span>
+        </div>
+      </div>
+      <div class="source-history">
+        <div class="history-label">&#128218; 過去の一次情報実績</div>
+        <ul class="history-list">
+          <li><span class="hist-date">2022年11月</span>FTX崩壊の兆候（Sam Bankman-Friedへの疑念・出金遅延報告）が<strong>r/CryptoCurrency</strong>で最初にまとめられ、崩壊前に広く認知された</li>
+          <li><span class="hist-date">2022年5月</span>LUNA/USTのデペッグをいち早く警告するスレッドが集中。価格暴落前に一次情報として機能した</li>
+          <li><span class="hist-date">2021年</span>GameStop/AMC連動のミーム相場でも、コミュニティ主導の情報発信が株・仮想通貨双方を動かした</li>
+        </ul>
+      </div>
+      <div class="source-live">
+        <div class="live-label">&#128225; 現在のホット投稿</div>
+        <div id="reddit-feed" class="feed-list"><p class="placeholder">取得中…</p></div>
+      </div>
+    </div>
+
+    <!-- GitHub (プロトコル) -->
+    <div class="source-panel" id="src-github">
+      <div class="source-header">
+        <div class="source-meta">
+          <span class="source-badge badge-github">GitHub</span>
+          <div class="source-name">Ethereum EIPs / Bitcoin Core / Solana</div>
+        </div>
+        <div class="source-fetch-status" id="github-fetch-status">
+          <span class="dot dot-idle"></span><span>待機中</span>
+        </div>
+      </div>
+      <div class="source-history">
+        <div class="history-label">&#128218; 過去の一次情報実績</div>
+        <ul class="history-list">
+          <li><span class="hist-date">2022年9月</span>The Merge（ETHのPoW→PoS移行）はEthereumのGitHubリポジトリ上でのEIP議論が出発点。全ての技術変更はここから始まった</li>
+          <li><span class="hist-date">2021年11月</span>Bitcoin Taprootアップグレードの提案・実装・マージはBitcoin CoreのGitHubで全て公開された一次情報</li>
+          <li><span class="hist-date">2023年</span>ERC-4337（Account Abstraction）の仕様策定はEIPのIssue/PRがメディア報道より先行した</li>
+        </ul>
+      </div>
+      <div class="source-live">
+        <div class="live-label">&#128225; 最新のプロトコル活動</div>
+        <div id="github-feed" class="feed-list"><p class="placeholder">取得中…</p></div>
+      </div>
+    </div>
+
+    <!-- CoinGecko Trending -->
+    <div class="source-panel" id="src-trending">
+      <div class="source-header">
+        <div class="source-meta">
+          <span class="source-badge badge-coingecko">CoinGecko</span>
+          <div class="source-name">トレンドコイン（SNS話題集計）</div>
+        </div>
+        <div class="source-fetch-status" id="trending-fetch-status">
+          <span class="dot dot-idle"></span><span>待機中</span>
+        </div>
+      </div>
+      <div class="source-history">
+        <div class="history-label">&#128218; 過去の一次情報実績</div>
+        <ul class="history-list">
+          <li><span class="hist-date">役割</span>CoinGeckoのTrendingは<strong>Twitter/X・Telegram・Discord</strong>での検索急増を集計したもの。SNS上の一次情報が価格に織り込まれる前の段階で検出できる</li>
+          <li><span class="hist-date">傾向</span>トレンド入りしたコインはその後24〜72時間以内に出来高・価格が変動するケースが多く、早期シグナルとして機能する</li>
+        </ul>
+      </div>
+      <div class="source-live">
+        <div class="live-label">&#128225; 現在のトレンドコイン（SNS急上昇）</div>
+        <div id="trending-feed" class="feed-list"><p class="placeholder">取得中…</p></div>
+      </div>
+    </div>
+
+    <!-- オンチェーン（Bitcoin） -->
+    <div class="source-panel" id="src-onchain">
+      <div class="source-header">
+        <div class="source-meta">
+          <span class="source-badge badge-onchain">On-Chain</span>
+          <div class="source-name">Bitcoin Mempool &amp; ブロックチェーン統計</div>
+        </div>
+        <div class="source-fetch-status" id="onchain-fetch-status">
+          <span class="dot dot-idle"></span><span>待機中</span>
+        </div>
+      </div>
+      <div class="source-history">
+        <div class="history-label">&#128218; 過去の一次情報実績</div>
+        <ul class="history-list">
+          <li><span class="hist-date">2022年11月</span>FTX崩壊の数時間前、FTXウォレットから取引所への大量入金がオンチェーンで観測された。ブロックチェーン上の動きはメディア報道より先に現れる最も純粋な一次情報</li>
+          <li><span class="hist-date">2024年4月</span>Bitcoin半減期直前のmempoolが急激に混雑し手数料が急騰。イベント前のオンチェーン異変としてリアルタイムに観測可能だった</li>
+          <li><span class="hist-date">役割</span>すべての取引・残高変動が誰でも検証可能な形で記録されるブロックチェーンは、第三者の解釈を介さない「最上流の一次情報」である</li>
+        </ul>
+      </div>
+      <div class="source-live">
+        <div class="live-label">&#128225; 現在のオンチェーン状態</div>
+        <div id="onchain-feed"><p class="placeholder">取得中…</p></div>
+      </div>
+    </div>
+
+    <!-- Fear & Greed -->
+    <div class="source-panel" id="src-fng">
+      <div class="source-header">
+        <div class="source-meta">
+          <span class="source-badge badge-sentiment">Sentiment</span>
+          <div class="source-name">Fear &amp; Greed Index</div>
+        </div>
+        <div class="source-fetch-status" id="fng-fetch-status">
+          <span class="dot dot-idle"></span><span>待機中</span>
+        </div>
+      </div>
+      <div class="source-history">
+        <div class="history-label">&#128218; 過去の一次情報実績</div>
+        <ul class="history-list">
+          <li><span class="hist-date">集計元</span>Twitter言及数・検索ボリューム・出来高・ボラティリティ・BTC dominanceを合算。SNS上のセンチメントが数値化された一次指標</li>
+          <li><span class="hist-date">2022年6月</span>LUNA崩壊直後に「極度の恐怖（6）」を記録。過去の底値圏と高い相関がある</li>
+          <li><span class="hist-date">2021年11月</span>ATH更新時は「極度の強欲（90+）」。天井圏と高い相関</li>
+        </ul>
+      </div>
+      <div class="source-live">
+        <div class="live-label">&#128225; 現在の市場センチメント</div>
+        <div id="fng-feed" class="fng-display">
+          <div class="fng-gauge">
+            <svg viewBox="0 0 200 110">
+              <path d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#2a2a3e" stroke-width="16" stroke-linecap="round"/>
+              <path id="fng-arc" d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#7c6eff" stroke-width="16" stroke-linecap="round" stroke-dasharray="0 251"/>
+              <text id="fng-num" x="100" y="88" text-anchor="middle" font-size="30" font-weight="700" fill="#dde0f0">—</text>
+              <text id="fng-tag" x="100" y="106" text-anchor="middle" font-size="11" fill="#6e7191">読込中</text>
+            </svg>
+          </div>
+          <div class="fng-legend">
+            <span style="color:#ff4d6d">0 恐怖</span>
+            <span style="color:#ffba00">50 中立</span>
+            <span style="color:#00d97e">100 強欲</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 公式SNSリンク集 ===== -->
+    <h2 class="section-title" style="margin-top:28px;">公式SNSアカウント — 一次情報へのダイレクトリンク</h2>
+    <p class="section-note">Twitter/X・TelegramはAPIキー不要で直接アクセス可能な一次情報源</p>
+    <div class="links-grid" id="official-links">
+      <!-- JS で生成 -->
+    </div>
+
+  </div><!-- /.container -->
+
+  <script src="js/sources.js"></script>
+  <script src="js/actions.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

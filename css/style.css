@@ -1,5 +1,701 @@
-h1{
-  font-size: 24px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #ddd;
+/* =========================================================
+   仮想通貨 SNS一次情報ダッシュボード — スタイルシート
+   ========================================================= */
+
+:root {
+  --bg:        #0d0d12;
+  --surface:   #161621;
+  --surface2:  #1e1e2e;
+  --border:    #2a2a3e;
+  --text:      #dde0f0;
+  --muted:     #6e7191;
+  --accent:    #7c6eff;
+  --green:     #00d97e;
+  --yellow:    #ffba00;
+  --red:       #ff4d6d;
+  --reddit:    #ff4500;
+  --github:    #58a6ff;
+  --coingecko: #8dc647;
+  --sentiment: #ffba00;
+  --onchain:   #f7931a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', 'Helvetica Neue', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   レイアウト
+   ========================================================= */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+}
+
+/* =========================================================
+   ヘッダー
+   ========================================================= */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+header h1 {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  border: none;
+  padding: 0;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 5px;
+}
+
+.subtitle strong { color: var(--text); font-weight: 600; }
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-pill {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--green);
+}
+
+.muted { color: var(--muted); font-size: 11px; }
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  padding: 7px 14px;
+}
+
+.btn-secondary {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+button:hover { opacity: 0.85; }
+
+/* =========================================================
+   アクションパネル
+   ========================================================= */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.action-panel {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(124,110,255,0.15), 0 4px 24px rgba(124,110,255,0.07);
+}
+
+.panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 10px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.panel-body { padding: 16px; }
+
+/* アクションアイテム */
+.action-item {
+  display: flex;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+
+.action-item:last-child { border-bottom: none; }
+
+.action-priority {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.priority-high   { background: rgba(255,77,109,0.15);  color: var(--red); }
+.priority-medium { background: rgba(255,186,0,0.12);   color: var(--yellow); }
+.priority-low    { background: rgba(0,217,126,0.10);   color: var(--green); }
+.priority-info   { background: rgba(124,110,255,0.12); color: var(--accent); }
+
+.action-body { flex: 1; }
+
+.action-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.action-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.action-source {
+  font-size: 11px;
+  color: var(--accent);
+  margin-top: 5px;
+  opacity: 0.8;
+}
+
+/* =========================================================
+   セクションタイトル
+   ========================================================= */
+.section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 14px;
+  border: none;
+  padding: 0;
+}
+
+.section-note {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 14px;
+  margin-top: -10px;
+}
+
+/* =========================================================
+   ソースパネル
+   ========================================================= */
+.source-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.source-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.source-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.source-name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.source-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.badge-reddit    { background: rgba(255,69,0,0.15);   color: var(--reddit); }
+.badge-github    { background: rgba(88,166,255,0.12); color: var(--github); }
+.badge-coingecko { background: rgba(141,198,71,0.12); color: var(--coingecko); }
+.badge-sentiment { background: rgba(255,186,0,0.12);  color: var(--sentiment); }
+.badge-onchain   { background: rgba(247,147,26,0.15); color: var(--onchain); }
+
+.source-fetch-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-idle    { background: var(--border); }
+.dot-loading { background: var(--yellow); animation: blink 1s ease-in-out infinite; }
+.dot-ok      { background: var(--green); }
+.dot-error   { background: var(--red); }
+
+@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+/* 過去実績 */
+.source-history {
+  padding: 12px 16px;
+  background: rgba(124,110,255,0.03);
+  border-bottom: 1px solid var(--border);
+}
+
+.history-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.history-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.history-list li {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  padding-left: 14px;
+  position: relative;
+}
+
+.history-list li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.hist-date {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-right: 6px;
+  background: rgba(124,110,255,0.10);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+/* ライブフィード */
+.source-live {
+  padding: 12px 16px;
+}
+
+.live-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Redditフィードアイテム */
+.feed-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.feed-item:last-child { border-bottom: none; }
+
+.feed-score {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--reddit);
+  min-width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.feed-body { flex: 1; }
+
+.feed-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  line-height: 1.4;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.feed-title:hover { color: var(--accent); }
+
+.feed-meta {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.feed-sub { color: var(--accent); }
+
+/* GitHubフィードアイテム */
+.github-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.github-item:last-child { border-bottom: none; }
+
+.github-repo-tag {
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(88,166,255,0.10);
+  color: var(--github);
+  padding: 2px 7px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.github-body { flex: 1; }
+
+.github-msg {
+  font-size: 13px;
+  color: var(--text);
+  text-decoration: none;
+  display: block;
+  margin-bottom: 2px;
+  line-height: 1.4;
+}
+
+.github-msg:hover { color: var(--accent); }
+
+.github-meta { font-size: 11px; color: var(--muted); }
+
+/* Trendingフィードアイテム */
+.trend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.trend-item:last-child { border-bottom: none; }
+
+.trend-rank {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  min-width: 22px;
+}
+
+.trend-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.trend-name { font-size: 13px; font-weight: 700; flex: 1; }
+.trend-sym  { font-size: 11px; color: var(--muted); margin-left: 4px; }
+
+.trend-price {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.trend-change {
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 54px;
+  text-align: right;
+}
+
+.pos { color: var(--green); }
+.neg { color: var(--red); }
+
+/* Fear & Greed */
+.fng-display {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.fng-gauge { width: 160px; flex-shrink: 0; }
+.fng-gauge svg { width: 100%; }
+
+.fng-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.fng-detail { flex: 1; min-width: 160px; }
+
+.fng-value-large {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.fng-classification {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.fng-desc {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   公式SNSリンク集
+   ========================================================= */
+.links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.link-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  text-decoration: none;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+
+.link-card:hover { border-color: var(--accent); }
+
+.link-icon { font-size: 20px; flex-shrink: 0; }
+
+.link-body { flex: 1; min-width: 0; }
+
+.link-name {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.link-handle {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.link-type {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.type-x        { background: rgba(255,255,255,0.08); color: var(--text); }
+.type-telegram { background: rgba(41,182,246,0.12);  color: #29b6f6; }
+.type-discord  { background: rgba(88,101,242,0.12);  color: #5865f2; }
+
+/* =========================================================
+   汎用
+   ========================================================= */
+.placeholder {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 12px 0;
+}
+
+.spinner {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-msg {
+  font-size: 12px;
+  color: var(--red);
+  padding: 8px 0;
+}
+
+/* =========================================================
+   オンチェーン表示
+   ========================================================= */
+.onchain-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.onchain-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.onchain-card-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.mempool-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.mempool-stat:last-child { border-bottom: none; }
+
+.mempool-label { color: var(--muted); font-size: 12px; }
+.mempool-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* 混雑バー */
+.congestion-bar-wrap { margin-top: 10px; }
+
+.congestion-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.congestion-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.congestion-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease, background 0.3s;
+}
+
+/* 手数料テーブル */
+.fee-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.fee-table td {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+
+.fee-table tr:last-child td { border-bottom: none; }
+
+.fee-table td:first-child { color: var(--muted); }
+.fee-table td:last-child  { text-align: right; font-weight: 700; }
+
+.fee-high   { color: var(--red); }
+.fee-medium { color: var(--yellow); }
+.fee-low    { color: var(--green); }
+
+/* =========================================================
+   レスポンシブ
+   ========================================================= */
+@media (max-width: 600px) {
+  header { flex-direction: column; }
+  .links-grid { grid-template-columns: 1fr 1fr; }
+  .fng-display { flex-direction: column; align-items: flex-start; }
+  .fng-gauge { width: 140px; }
+  .onchain-grid { grid-template-columns: 1fr; }
 }
