@@ -1,14 +1,12 @@
 package com.example.macrodoroid
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.database.Cursor
-import android.net.Uri
 import android.os.Bundle
-import android.provider.ContactsContract
 import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -17,16 +15,17 @@ import androidx.appcompat.app.AppCompatActivity
 class MainActivity : AppCompatActivity() {
 
     companion object {
-        const val REQUEST_PICK_CONTACT = 1
         const val PREFS_NAME = "macrodoroid_prefs"
-        const val KEY_PHONE_NUMBER = "phone_number"
+        const val KEY_PHONE_NUMBERS = "phone_numbers"
         const val KEY_ENABLED = "enabled"
+        const val SEPARATOR = ","
     }
 
     private lateinit var prefs: SharedPreferences
-    private lateinit var tvPhoneNumber: TextView
+    private lateinit var etPhoneNumber: EditText
+    private lateinit var btnAddNumber: Button
+    private lateinit var llPhoneList: LinearLayout
     private lateinit var switchEnabled: Switch
-    private lateinit var btnPickContact: Button
     private lateinit var btnNotificationAccess: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,63 +34,88 @@ class MainActivity : AppCompatActivity() {
 
         prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-        tvPhoneNumber = findViewById(R.id.tvPhoneNumber)
+        etPhoneNumber = findViewById(R.id.etPhoneNumber)
+        btnAddNumber = findViewById(R.id.btnAddNumber)
+        llPhoneList = findViewById(R.id.llPhoneList)
         switchEnabled = findViewById(R.id.switchEnabled)
-        btnPickContact = findViewById(R.id.btnPickContact)
         btnNotificationAccess = findViewById(R.id.btnNotificationAccess)
-
-        updateUI()
-
-        btnPickContact.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
-            startActivityForResult(intent, REQUEST_PICK_CONTACT)
-        }
 
         btnNotificationAccess.setOnClickListener {
             startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"))
         }
 
+        btnAddNumber.setOnClickListener {
+            val number = etPhoneNumber.text.toString().trim()
+            if (number.isEmpty()) {
+                Toast.makeText(this, "番号を入力してください", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val numbers = getPhoneNumbers().toMutableSet()
+            if (numbers.contains(number)) {
+                Toast.makeText(this, "すでに登録されています", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            numbers.add(number)
+            savePhoneNumbers(numbers)
+            etPhoneNumber.text.clear()
+            refreshPhoneList()
+        }
+
         switchEnabled.setOnCheckedChangeListener { _, isChecked ->
-            val phoneNumber = prefs.getString(KEY_PHONE_NUMBER, null)
-            if (isChecked && phoneNumber == null) {
+            if (isChecked && getPhoneNumbers().isEmpty()) {
                 switchEnabled.isChecked = false
-                Toast.makeText(this, "先に転送先の連絡先を選択してください", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "先に転送先の番号を追加してください", Toast.LENGTH_SHORT).show()
                 return@setOnCheckedChangeListener
             }
             prefs.edit().putBoolean(KEY_ENABLED, isChecked).apply()
         }
+
+        refreshPhoneList()
+        switchEnabled.isChecked = prefs.getBoolean(KEY_ENABLED, false)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_PICK_CONTACT && resultCode == Activity.RESULT_OK) {
-            data?.data?.let { uri ->
-                val phone = getPhoneNumber(uri)
-                if (phone != null) {
-                    prefs.edit().putString(KEY_PHONE_NUMBER, phone).apply()
-                    updateUI()
-                } else {
-                    Toast.makeText(this, "電話番号を取得できませんでした", Toast.LENGTH_SHORT).show()
+    private fun getPhoneNumbers(): Set<String> {
+        val raw = prefs.getString(KEY_PHONE_NUMBERS, "") ?: ""
+        return if (raw.isEmpty()) emptySet() else raw.split(SEPARATOR).toSet()
+    }
+
+    private fun savePhoneNumbers(numbers: Set<String>) {
+        prefs.edit().putString(KEY_PHONE_NUMBERS, numbers.joinToString(SEPARATOR)).apply()
+    }
+
+    private fun refreshPhoneList() {
+        llPhoneList.removeAllViews()
+        val numbers = getPhoneNumbers()
+        if (numbers.isEmpty()) {
+            val tv = TextView(this)
+            tv.text = "（未登録）"
+            tv.setTextColor(0xFF6E6E73.toInt())
+            llPhoneList.addView(tv)
+            return
+        }
+        for (number in numbers) {
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+            }
+            val tv = TextView(this).apply {
+                text = number
+                textSize = 16f
+                setTextColor(0xFF1D1D1F.toInt())
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            }
+            val btn = Button(this).apply {
+                text = "削除"
+                setOnClickListener {
+                    val updated = getPhoneNumbers().toMutableSet()
+                    updated.remove(number)
+                    savePhoneNumbers(updated)
+                    refreshPhoneList()
                 }
             }
+            row.addView(tv)
+            row.addView(btn)
+            llPhoneList.addView(row)
         }
-    }
-
-    private fun getPhoneNumber(uri: Uri): String? {
-        var cursor: Cursor? = null
-        return try {
-            cursor = contentResolver.query(uri, arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER), null, null, null)
-            if (cursor?.moveToFirst() == true) {
-                cursor.getString(0)
-            } else null
-        } finally {
-            cursor?.close()
-        }
-    }
-
-    private fun updateUI() {
-        val phone = prefs.getString(KEY_PHONE_NUMBER, null)
-        tvPhoneNumber.text = phone ?: "未設定"
-        switchEnabled.isChecked = prefs.getBoolean(KEY_ENABLED, false)
     }
 }

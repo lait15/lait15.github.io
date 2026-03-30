@@ -12,8 +12,9 @@ class LineNotificationListener : NotificationListenerService() {
     companion object {
         const val LINE_PACKAGE = "jp.naver.line.android"
         const val PREFS_NAME = "macrodoroid_prefs"
-        const val KEY_PHONE_NUMBER = "phone_number"
+        const val KEY_PHONE_NUMBERS = "phone_numbers"
         const val KEY_ENABLED = "enabled"
+        const val SEPARATOR = ","
     }
 
     private lateinit var prefs: SharedPreferences
@@ -27,7 +28,9 @@ class LineNotificationListener : NotificationListenerService() {
         if (sbn.packageName != LINE_PACKAGE) return
         if (!prefs.getBoolean(KEY_ENABLED, false)) return
 
-        val phoneNumber = prefs.getString(KEY_PHONE_NUMBER, null) ?: return
+        val raw = prefs.getString(KEY_PHONE_NUMBERS, "") ?: ""
+        if (raw.isEmpty()) return
+        val phoneNumbers = raw.split(SEPARATOR)
 
         val extras = sbn.notification.extras
         val title = extras.getString(Notification.EXTRA_TITLE) ?: ""
@@ -36,12 +39,14 @@ class LineNotificationListener : NotificationListenerService() {
         val message = if (title.isNotEmpty()) "[$title] $text" else text
         if (message.isBlank()) return
 
-        try {
-            val smsManager = SmsManager.getDefault()
-            val parts = smsManager.divideMessage(message)
-            smsManager.sendMultipartTextMessage(phoneNumber, null, parts, null, null)
-        } catch (e: Exception) {
-            e.printStackTrace()
+        val smsManager = SmsManager.getDefault()
+        for (number in phoneNumbers) {
+            try {
+                val parts = smsManager.divideMessage(message)
+                smsManager.sendMultipartTextMessage(number, null, parts, null, null)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }
